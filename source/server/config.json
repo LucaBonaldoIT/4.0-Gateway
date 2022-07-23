@@ -1,0 +1,51 @@
+{
+    "url": "localhost",
+    "port": 8880,
+    "devices": [
+        {
+            "host": "localhost",
+            "port": 8880,
+            "unit": 1,
+            "pollrate": 500,
+            "onebased": true,
+            "parameters": [
+                {
+                    "type": "holdingregister",
+                    "addresses": [
+                        {
+                            "address": 0,
+                            "count": 0
+                        }
+                    ]
+                },
+                {
+                    "type": "coils",
+                    "addresses": [
+                        {
+                            "address": 0,
+                            "count": 0
+                        }
+                    ]
+                },
+                {
+                    "type": "discreteinputs",
+                    "addresses": [
+                        {
+                            "address": 0,
+                            "count": 0
+                        }
+                    ]
+                },
+                {
+                    "type": "inputregisters",
+                    "addresses": [
+                        {
+                            "address": 0,
+                            "count": 0
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
