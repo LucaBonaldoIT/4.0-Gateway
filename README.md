@@ -1,4 +1,7 @@
 # 4.0 Gateway
+
+![Project banner](images/github/project-banner.png?raw=true)
+
 ## Introduction
 Industry 4.0 Gateway is a project that aims to enable old machine to comply with Industry 4.0 standards. The software in the repository is designed to run on a Raspberry 4, and the like, connected to the HMI panel that does not support Industry 4.0 standards. The latter will have to allow communication via Modbus TCP/IP, so that the Raspberry can interface with it.
 
