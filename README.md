@@ -7,6 +7,9 @@ Industry 4.0 Gateway is a project that aims to enable old machine to comply with
 
 ## Key Points
 **The key points of the project will be explained below.**
+
+![Project diagram](images/github/project-diagram.png?raw=true)
+
 #### - OPC-UA
 The gateway will also work as a Modbus TCP/IP to OPC-UA server, as required by Industry 4.0 standards. 
 #### - Bidirectionality Of Data
