@@ -9,7 +9,7 @@
     <title>HMI</title>
 
     <link rel="stylesheet" href="./css/index.css">
-    <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="./modules/bootstrap/css/bootstrap.min.css">
 
 </head>
 <body class="container-fluid d-flex flex-column bg-light text-bg-light">
@@ -28,8 +28,17 @@
 
     <hr>
 
-    <script src="./jquery/js/jquery-3.6.0.js"></script>
-    <script src="./bootstrap/js/bootstrap.bundle.js"></script>
+    <div class="container">
+        <h2>HMI Data</h2>
+        <div class="container-fluid chart-container">
+            <canvas id="temp-chart" class="chart"></canvas>
+        </div>
+
+    </div>
+
+    <script src="./modules/jquery/js/jquery-3.6.0.js"></script>
+    <script src="./modules/bootstrap/js/bootstrap.bundle.js"></script>
+    <script src="./modules/chartjs/js/chart.min.js"></script>
     <script src="./js/index.js"></script>
 
 </body>
