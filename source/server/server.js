@@ -54,31 +54,37 @@ class Server {
         };
         return server_node;
       })(register, type, address, i);
-      Server.OPCUAServer.engine.addressSpace.addVariable(node);
+      Server.OPCUAServer.engine.addressSpace.getOwnNamespace().addVariable(node)
     }
   }
 
   static construct_address_space() {
-    var devices_node = Server.OPCUAServer.engine.addressSpace.addFolder(
-      "RootFolder",
-      { browseName: "HMI" }
-    );
+    var address_space = Server.OPCUAServer.engine.addressSpace
+    var namespace = address_space.getOwnNamespace()
+
+    var device_namespace = namespace.addObject({
+        organizedBy: address_space.rootFolder.objects,
+        browseName: "HMI"
+    })
 
     config.devices.forEach(function (device) {
       modbus.CreateModbusDevice(device.host, device.port, device.unit);
+
       var device_node_full_name =
         device.host + ":" + device.port + " unit: " + device.unit;
-      var device_node = Server.OPCUAServer.engine.addressSpace.addFolder(
-        devices_node,
-        { browseName: device_node_full_name }
-      );
+
+      var device_node = namespace.addObject({
+        organizedBy: device_namespace,
+        browseName: device_node_full_name
+      })
+
       device.parameters.forEach(function (parameter) {
-        var parameter_type = Server.OPCUAServer.engine.addressSpace.addFolder(
-          device_node,
-          { browseName: parameter.type }
-        );
+        var parameter_type = namespace.addObject({
+            organizedBy: device_node,
+            browseName: parameter.type
+        });
         parameter.addresses.forEach(function (address_info) {
-          create_modbus_variables(
+          Server.create_modbus_variables(
             modbus,
             device_node.browseName + parameter_type.browseName,
             parameter_type,
@@ -97,11 +103,12 @@ class Server {
     Server.OPCUAServer = new opcua.OPCUAServer({
       port: config.port,
       resourcePath: config.url,
+      buildInfo: {
+        productName: "HMI-OPC-UA-SERVER",
+        buildNumber: "1",
+        buildDate: new Date()
+      }
     });
-
-    Server.OPCUAServer.buildInfo.productName = "HMI-OPC-UA-SERVER";
-    Server.OPCUAServer.buildInfo.buildNumber = "1";
-    Server.OPCUAServer.buildInfo.buildDate = new Date();
 
     await Server.OPCUAServer.initialize(() => {
       Server.construct_address_space();
@@ -113,4 +120,6 @@ class Server {
   }
 }
 
-// (async () => {await Server.initialize();})
+(async () => {
+    Server.initialize()
+})();

@@ -8,6 +8,7 @@
 
 var jsmodbus = require("jsmodbus");
 var opcua = require("node-opcua");
+const net = require("net")
 
 var modbus = {
   client: {},
@@ -33,7 +34,7 @@ var modbus = {
     }
   },
   StartPoll: function (name, type, address, count, pollrate) {
-    this.client.on("error", () => {
+    this.socket.on("error", () => {
       for (var property in this.value_map) {
         if (this.value_map.hasOwnProperty(property)) {
           this.value_map[property].q = "bad";
@@ -76,7 +77,13 @@ var modbus = {
     }
   },
   CreateModbusDevice: function (host, port, unit) {
-    var modbus_client = modbus.client.tcp.complete({
+
+    const socket = new net.Socket()
+
+    var modbus_client = new jsmodbus.client.TCP(socket, unit, 5000)
+
+    /*
+    jsmodbus.client.TCP.complete({
       host: host,
       port: port,
       autoReconnect: true,
@@ -84,16 +91,24 @@ var modbus = {
       timeout: 5000,
       unitId: unit,
     });
-    modbus_client.connect();
+    */
+
+    socket.connect({
+        host: host,
+        port: port,
+    })
+
     this.client = modbus_client;
-  },
+    this.socket = socket;
+},
 };
 
 function polldata(client, value_map, root_name, type, address, count) {
+  console.log(value_map)
   switch (type) {
     case "holdingregister":
       client.readHoldingRegisters(address, count).then(function (resp) {
-        resp.register.forEach(function (value, i) {
+        resp.response.body.values.forEach(function (value, i) {
           var full_address = (address + i).toString();
           value_map[root_name + full_address] = {
             v: new opcua.Variant({
@@ -108,7 +123,8 @@ function polldata(client, value_map, root_name, type, address, count) {
 
     case "inputregisters":
       client.readInputRegisters(address, count).then(function (resp) {
-        resp.register.forEach(function (value, i) {
+        console.log(resp)
+        resp.response.body.values.forEach(function (value, i) {
           var full_address = (address + i).toString();
           value_map[root_name + full_address] = {
             v: new opcua.Variant({
@@ -123,11 +139,11 @@ function polldata(client, value_map, root_name, type, address, count) {
 
     case "coils":
       client.readCoils(address, count).then(function (resp) {
-       resp.coils.forEach(function (value, i) {
+        resp.response.body.values.forEach(function (value, i) {
           var full_address = (address + i).toString();
           value_map[root_name + full_address] = {
             v: new opcua.Variant({
-              dataType: opcua.DataType.Boolean,
+              dataType: opcua.DataType.Int32,//Boolean,
               value: value,
             }),
             q: "good",
@@ -138,7 +154,7 @@ function polldata(client, value_map, root_name, type, address, count) {
 
     case "discreteinputs":
       client.readDiscreteInputs(address, count).then(function (resp) {
-        resp.coils.forEach(function (value, i) {
+        resp.response.body.valuesAsArray.forEach(function (value, i) {
           var full_address = (address + i).toString();
           value_map[root_name + full_address] = {
             v: new opcua.Variant({
