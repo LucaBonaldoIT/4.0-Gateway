@@ -1,0 +1,13 @@
+.btn-theme-toggle {
+    width: 50px;
+    aspect-ratio: 1;
+}
+
+.btn-theme-toggle img {
+    width: 100%;
+}
+
+.inverted {
+    filter: invert(1);
+    -webkit-filter: invert(1);
+}
