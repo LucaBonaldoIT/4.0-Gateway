@@ -82,17 +82,6 @@ var modbus = {
 
     var modbus_client = new jsmodbus.client.TCP(socket, unit, 5000)
 
-    /*
-    jsmodbus.client.TCP.complete({
-      host: host,
-      port: port,
-      autoReconnect: true,
-      reconnectTimeout: 1000,
-      timeout: 5000,
-      unitId: unit,
-    });
-    */
-
     socket.connect({
         host: host,
         port: port,
@@ -104,7 +93,6 @@ var modbus = {
 };
 
 function polldata(client, value_map, root_name, type, address, count) {
-  console.log(value_map)
   switch (type) {
     case "holdingregister":
       client.readHoldingRegisters(address, count).then(function (resp) {
@@ -123,7 +111,6 @@ function polldata(client, value_map, root_name, type, address, count) {
 
     case "inputregisters":
       client.readInputRegisters(address, count).then(function (resp) {
-        console.log(resp)
         resp.response.body.values.forEach(function (value, i) {
           var full_address = (address + i).toString();
           value_map[root_name + full_address] = {
