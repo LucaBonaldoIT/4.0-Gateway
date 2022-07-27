@@ -8,94 +8,44 @@
 
 var modbusjs = require("jsmodbus");
 var opcua = require("node-opcua");
-var modbus = require("./modbus");
+var Modbus = require("./modbus").Modbus;
 var config = require("./config.json");
 
 class Server {
   static OPCUAServer = null;
 
-  static create_modbus_variables(
-    modbus,
-    root_name,
-    register,
-    type,
-    address,
-    count,
-    device
-  ) {
-    var start_address = address;
-
-    if (device.onebased && address > 0) {
-      start_address = address - 1;
-    } else if (address == 0) {
-      return;
-    } else if (address < 0) {
-      return;
-    }
-    modbus.StartPoll(root_name, type, start_address, count, device.pollrate);
-    for (var i = 0; i < count; i++) {
-      var node = (function (register, type, address, i) {
-        var server_node = {
-          componentOf: register,
-          browseName: (address + i).toString(),
-          minimumSamplingInterval: device.pollrate,
-          dataType: modbus.GetDataTypeString(type),
-          value: {
-            get: function () {
-              return modbus.ReadValue(
-                root_name + (start_address + i).toString()
-              );
-            },
-            set: function (variant) {
-              modbus.WriteValue(type, start_address + i, variant);
-              return opcua.StatusCodes.Good;
-            },
-          },
-        };
-        return server_node;
-      })(register, type, address, i);
-      Server.OPCUAServer.engine.addressSpace.getOwnNamespace().addVariable(node)
-    }
-  }
-
   static construct_address_space() {
     var address_space = Server.OPCUAServer.engine.addressSpace
     var namespace = address_space.getOwnNamespace()
 
-    var device_namespace = namespace.addObject({
+    let device_namespace = namespace.addObject({
         organizedBy: address_space.rootFolder.objects,
         browseName: "HMI"
     })
 
-    config.devices.forEach(function (device) {
-      modbus.CreateModbusDevice(device.host, device.port, device.unit);
+    config.device.parameters.forEach(function (parameter) {
 
-      var device_node_full_name =
-        device.host + ":" + device.port + " unit: " + device.unit;
+      var parameter_node = {
+        componentOf: device_namespace,
+        browseName: parameter.name,
+        minimumSamplingInterval: config.device.pollrate,
+        dataType: opcua.DataType.Int16,
+        value: {
+          get: function () {
+            return new opcua.Variant({dataType: opcua.DataType.Int16, value: Modbus.map[parameter.address]})
+          },
+          set: function (variant) {
+            console.log(variant)
+            Modbus.write(parameter.type, variant.value[0], parameter.address);
+            return opcua.StatusCodes.Good;
+          },
+        },
+      };
 
-      var device_node = namespace.addObject({
-        organizedBy: device_namespace,
-        browseName: device_node_full_name
-      })
+      Server.OPCUAServer.engine.addressSpace.getOwnNamespace().addVariable(parameter_node)
 
-      device.parameters.forEach(function (parameter) {
-        var parameter_type = namespace.addObject({
-            organizedBy: device_node,
-            browseName: parameter.type
-        });
-        parameter.addresses.forEach(function (address_info) {
-          Server.create_modbus_variables(
-            modbus,
-            device_node.browseName + parameter_type.browseName,
-            parameter_type,
-            parameter.type,
-            address_info.address,
-            address_info.count,
-            device
-          );
-        });
-      });
     });
+
   }
 
   static async initialize() {
@@ -121,5 +71,7 @@ class Server {
 }
 
 (async () => {
-    Server.initialize()
+    await Modbus.initialize()
+    setTimeout(() => {    Server.initialize()
+    }, 2000)
 })();

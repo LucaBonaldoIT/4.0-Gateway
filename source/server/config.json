@@ -1,7 +1,7 @@
 {
     "url": "/modbus",
     "port": 4840,
-    "devices": [
+    "device": 
         {
             "host": "localhost",
             "port": 502,
@@ -10,42 +10,21 @@
             "onebased": true,
             "parameters": [
                 {
+                    "name" : "Temperature",
                     "type": "holdingregister",
-                    "addresses": [
-                        {
-                            "address": 100,
-                            "count": 0
-                        }
-                    ]
+                    "address": 1001
                 },
                 {
-                    "type": "coils",
-                    "addresses": [
-                        {
-                            "address": 0,
-                            "count": 1
-                        }
-                    ]
+                    "name" : "Humidity",
+                    "type": "holdingregister",
+                    "address": 1002
                 },
                 {
-                    "type": "discreteinputs",
-                    "addresses": [
-                        {
-                            "address": 22136,
-                            "count": 1
-                        }
-                    ]
-                },
-                {
-                    "type": "inputregisters",
-                    "addresses": [
-                        {
-                            "address": 0,
-                            "count": 0
-                        }
-                    ]
+                    "name" : "Counter",
+                    "type": "holdingregister",
+                    "address": 1003
                 }
             ]
         }
-    ]
+    
 }

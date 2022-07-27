@@ -3,6 +3,10 @@
 //import "../modules/jquery/js/jquery-3.6.0"
 //import "../modules/chartjs/js/chart.min.js"
 
+//const sqlite3 = require('sqlite3')
+
+console.log(sqlite3)
+
 function change_theme() {
   let current_theme = $("meta[name=theme]").attr("content");
 

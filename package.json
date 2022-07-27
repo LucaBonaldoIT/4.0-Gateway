@@ -4,6 +4,7 @@
   "description": "Industry 4.0 Gateway is a project that aims to enable old machine to comply with Industry 4.0 standards.",
   "dependencies": {
     "jsmodbus": "^4.0.6",
-    "node-opcua": "^2.72.2"
+    "node-opcua": "^2.72.2",
+    "sqlite3": "^5.0.10"
   }
 }
