@@ -1,45 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme" content="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme" content="light" />
 
     <title>HMI</title>
 
-    <link rel="stylesheet" href="./css/index.css">
-    <link rel="stylesheet" href="./modules/bootstrap/css/bootstrap.min.css">
-
-</head>
-<body class="container-fluid d-flex flex-column bg-light text-bg-light">
-
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/index.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='modules/bootstrap/css/bootstrap.min.css') }}"
+    />
+  </head>
+  <body
+    class="container-fluid d-flex flex-column bg-light text-bg-light"
+    onload="draw();"
+  >
     <div class="position-fixed" style="right: 10px; top: 10px">
-        <button class="btn btn-dark btn-theme-toggle" onclick="change_theme();">
-            <img class="inverted" src="./image/sun.png" alt="dark-mode-toggle">
-        </button>
+      <button class="btn btn-dark btn-theme-toggle" onclick="change_theme();">
+        <img
+          class="inverted"
+          src="{{ url_for('static', filename='./image/sun.png') }}"
+          alt="dark-mode-toggle"
+        />
+      </button>
     </div>
 
     <div class="my-2"></div>
 
     <div class="container-fluid d-flex justify-content-center">
-        <h1 class="">HMI Browser Application</h1>
+      <h1 class="">HMI Browser Application</h1>
     </div>
 
-    <hr>
+    <hr />
 
     <div class="container">
-        <h2>HMI Data</h2>
-        <div class="container-fluid chart-container">
-            <canvas id="temp-chart" class="chart"></canvas>
+      <h2>HMI Data</h2>
+      <div class="my-4"></div>
+      <div class="row">
+        <h3>Graph</h3>
+        <div class="col-9">
+          <div class="container-fluid chart-container">
+            <canvas id="temp-chart" class="chart">{{data | tojson}}</canvas>
+          </div>
         </div>
-
+        <div class="col-3">
+          <h3>Options</h3>
+          <div
+            class="container-fluid d-flex flex-column justify-content-around h-100"
+          >
+            <div class="row">
+              <div class="col-6">
+                <label for="form-max-result">Max:</label>
+                <input id="form-max-result" class="form-control" type="text" />
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-6">
+                <input id="autorefresh-on-check" class="form-check-input" type="checkbox" />
+                <label for="autorefresh-on-check">Auto refresh:</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-12">
+                <label for="last">Submit:</label>
+                <input
+                  class="form-control"
+                  type="submit"
+                  onclick="option_submit();"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <script src="./modules/jquery/js/jquery-3.6.0.js"></script>
-    <script src="./modules/bootstrap/js/bootstrap.bundle.js"></script>
-    <script src="./modules/chartjs/js/chart.min.js"></script>
-    <script src="./js/index.js"></script>
+    <script src="{{ url_for('static', filename='modules/jquery/js/jquery-3.6.0.js') }}"></script>
+    <script src="{{ url_for('static', filename='modules/bootstrap/js/bootstrap.bundle.js') }}"></script>
+    <script src="{{ url_for('static', filename='modules/chartjs/js/chart.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/index.js') }}"></script>
+    
+    <script>
+    {{ autorefresh_script }}
+    </script>
 
-</body>
+    <script>
+      function option_submit() {
+
+        let url = '/index?'
+
+        options = {
+          max : $('#form-max-result').val(),
+          autorefresh : $('#autorefresh-on-check').is(':checked')
+        }
+
+        for (const [key, value] of Object.entries(options)) {
+          if (key != null)
+            url += key + '=' + value + '&'
+        }
+
+        url = url.slice(0, -1)
+
+        window.location.replace(url)
+      }
+    </script>
+
+    <script>
+      const draw = () => {
+        let fetched = JSON.parse($("#temp-chart").html());
+        let ctx = document.getElementById("temp-chart");
+
+        datasets = [];
+        let timestamp = [];
+
+        for (let i in fetched.x) {
+          var d = fetched.x[i].substr(11, 12);
+          timestamp.push(d);
+        }
+
+        for (let i in fetched.labels) {
+          datasets.push({
+            label: fetched.labels[i],
+            data: fetched.y[fetched.labels[i]],
+            fill: false,
+            borderColor: `rgb(${Math.floor(Math.random() * 256)}, ${Math.floor(
+              Math.random() * 256
+            )}, ${Math.floor(Math.random() * 256)})`,
+            tension: 0.1,
+          });
+        }
+
+        let data = {
+          labels: timestamp,
+          datasets: datasets,
+        };
+
+        let config = {
+          type: "line",
+          data: data,
+        };
+
+        var chart = new Chart(ctx, config);
+      };
+    </script>
+  </body>
 </html>

@@ -35,7 +35,6 @@ class Server {
             return new opcua.Variant({dataType: opcua.DataType.Int16, value: Modbus.map[parameter.address]})
           },
           set: function (variant) {
-            console.log(variant)
             Modbus.write(parameter.type, variant.value[0], parameter.address);
             return opcua.StatusCodes.Good;
           },
